@@ -69,17 +69,19 @@
     [application registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert|UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeSound];
  //   [self.apnLib initWithParseAppId:@"xOlRZtt64oZelB9I2pZuypXPdpKeB9UthAvEupvX" clientKey:@"PvOJjpf7s0tsanib5JyzHaOgglZjqTNLSX4TwkO8"];
     
-    /*UILocalNotification *localNotif =
+    UILocalNotification *localNotification =
     [launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey];
-    */
+    if (localNotification) {
+        [self handeLocalNotification:localNotification];
+    }
+
     
     if (launchOptions != nil)
 	{
 		NSDictionary *dictionary = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
 		if (dictionary != nil)
 		{
-			NSLog(@"Launched from push notification: %@", dictionary);
-//			TO DO Implement functionality
+            [self handleRemoteNotification:dictionary];
 		}
 	}
     
@@ -103,14 +105,33 @@
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-//    [PFPush handlePush:userInfo];
+    [self handleRemoteNotification:userInfo];
+}
+
+- (void)handleRemoteNotification:(NSDictionary *)userInfo {
     NSString *urlString = [userInfo objectForKey:@"url"];
     NSDictionary *apsDictionary = [userInfo objectForKey:@"aps"];
     NSString *alertString = [apsDictionary objectForKey:@"alert"];
     NSLog(@"alert: %@, url: %@",alertString,urlString);
     self.lastNotificationURL = urlString;
     [self displayAlert:alertString url:urlString];
+}
 
+- (void)application:(UIApplication *)application
+didReceiveLocalNotification:(UILocalNotification *)notification
+{
+    [self handeLocalNotification:notification];
+}
+
+- (void)handeLocalNotification:(UILocalNotification *)notification
+{
+    NSString *message = notification.alertBody;
+    NSString *url;
+    if (notification.userInfo) {
+        url = [notification.userInfo objectForKey:@"url"];
+    }
+    self.lastNotificationURL = url;
+    [self displayAlert:message url:url];
 }
 
 - (void)displayAlert:(NSString *)message url:(NSString *)url
@@ -130,7 +151,7 @@
 
 -(void)openURL:(NSString *)urlParameters
 {
-    NSString *urlString = [NSString stringWithFormat:@"http://localhost:8080?%@",urlParameters];
+    NSString *urlString = [NSString stringWithFormat:@"http://uicatalog.parseapp.com?%@",urlParameters];
     NSURL *url = [NSURL URLWithString:urlString];
     if (![[UIApplication sharedApplication] openURL:url]) {
         NSLog(@"%@%@",@"Failed to open url:",[url description]);
