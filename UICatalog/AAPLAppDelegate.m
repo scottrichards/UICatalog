@@ -151,7 +151,7 @@ didReceiveLocalNotification:(UILocalNotification *)notification
 
 -(void)openURL:(NSString *)urlParameters
 {
-    NSString *urlString = [NSString stringWithFormat:@"http://uicatalog.parseapp.com?%@",urlParameters];
+    NSString *urlString = [NSString stringWithFormat:@"http://uicatalog.parseapp.com%@",urlParameters];
     NSURL *url = [NSURL URLWithString:urlString];
     if (![[UIApplication sharedApplication] openURL:url]) {
         NSLog(@"%@%@",@"Failed to open url:",[url description]);
